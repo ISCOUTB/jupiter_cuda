@@ -1,0 +1,23 @@
+# JupyterLab
+jupyterlab>=4.0
+ipywidgets
+ipykernel
+
+# Data science core
+numpy
+pandas
+matplotlib
+seaborn
+scikit-learn
+scipy
+pillow
+
+# Deep learning (PyTorch with CUDA 12.6)
+torch
+torchvision
+torchaudio
+
+# Utilities
+tqdm
+pyyaml
+requests
