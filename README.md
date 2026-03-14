@@ -1,25 +1,24 @@
-# JupyterLab + CUDA Docker
+# Entorno de ML/DL con JupyterLab (NVIDIA / Apple Silicon)
 
-Entorno de JupyterLab con soporte CUDA para usar la GPU desde el navegador.
+Este repositorio provee un entorno estandarizado de JupyterLab con soporte completo de aceleración por hardware tanto para usuarios con **GPUs de NVIDIA (CUDA)** en Windows/Linux, como para usuarios con **Apple Silicon (MPS/Metal)** en macOS.
 
-**GPU requerida:** NVIDIA (driver >= 525)
-**CUDA:** 12.6 | **Python:** 3.11 | **JupyterLab:** 4.x
+- **Para GPUs NVIDIA (Windows/Linux):** Utiliza Docker para encapsular un entorno CUDA.
+- **Para GPUs Mac (M1-M5):** Utiliza un script de configuración local, ya que Docker en Mac no permite acceso a la GPU.
+
+**Python Base:** 3.11 | **JupyterLab:** 4.x
 
 ---
 
-## Requisitos previos
+## Requisitos Previos según tu Sistema
 
-### Windows
-1. Instalar [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-2. Habilitar **WSL2** como backend (Settings > General > Use WSL 2)
-3. En Settings > Resources > WSL Integration, activar tu distro WSL2
-4. Instalar drivers NVIDIA para Windows (los mismos drivers de escritorio funcionan con WSL2)
+### Windows (GPU NVIDIA)
+- Instalar [Docker Desktop](https://www.docker.com/products/docker-desktop/).
+- Habilitar **WSL2** como backend (Settings > General > Use WSL 2) y asegurarte de tener la integración activada en tu distribución.
+- Tener los últimos drivers instalados en Windows (el soporte de GPU dentro de WSL usa el driver principal nativo).
 
-> El soporte de GPU en Docker Desktop para Windows requiere WSL2. No funciona con Hyper-V backend.
-
-### Linux
-1. Instalar Docker Engine: https://docs.docker.com/engine/install/
-2. Instalar **NVIDIA Container Toolkit**:
+### Linux (GPU NVIDIA)
+- Instalar [Docker Engine](https://docs.docker.com/engine/install/).
+- Instalar el kit **NVIDIA Container Toolkit** para conectar Docker a la tarjeta gráfica:
    ```bash
    curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg
    curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
@@ -30,84 +29,88 @@ Entorno de JupyterLab con soporte CUDA para usar la GPU desde el navegador.
    sudo systemctl restart docker
    ```
 
-### macOS
-> **Las GPUs NVIDIA no son compatibles con macOS.** Apple Silicon (M1/M2/M3) usa Metal, no CUDA.
-> El contenedor puede correr sin GPU (solo CPU) eliminando la seccion `deploy` del `docker-compose.yml`.
+### macOS (Apple Silicon M1-M5)
+> **Nota:** A diferencia de Windows/Linux, usarás un entorno nativo sin Docker.
+- Constar **únicamente** de tener instalado **Python 3.11**. (Puedes hacerlo mediante [python.org](https://www.python.org/downloads/macos/) o con `brew install python@3.11`).
 
 ---
 
-## Instalacion y uso
+## Instalación y Uso
 
-### 1. Clonar el repositorio
+Lo primero para cualquier plataforma es clonar este repositorio:
+
 ```bash
-git clone <url-del-repo>
-cd jupiter_cuda
+git clone https://github.com/ISCOUTB/jupyterlab_cuda.git
+cd jupyterlab_cuda
 ```
 
-### 2. Construir la imagen
-```bash
-docker compose build
-```
-La primera vez descarga la imagen base de CUDA (~5 GB) e instala los paquetes. Puede tardar varios minutos.
+A partir de aquí, sigue la ruta dependiendo de tu configuración:
 
-### 3. Iniciar JupyterLab
-```bash
-docker compose up
-```
+### Ruta A: Windows / Linux (Vía Docker con NVIDIA)
 
-Para correr en segundo plano:
-```bash
-docker compose up -d
-```
+1. **Construir la imagen:**
+   ```bash
+   docker compose build
+   ```
+   *(La primera vez puede tardar unos minutos descargando la imagen base de CUDA de ~5GB e instalando las librerías).*
 
-### 4. Acceder desde el navegador
-Abrir: **http://localhost:8888**
+2. **Iniciar JupyterLab:**
+   ```bash
+   docker compose up
+   ```
+   *(Usa `docker compose up -d` para correr en segundo plano. Para detener todo: `docker compose down`).*
 
-No se requiere token ni contrasena.
+### Ruta B: macOS (Vía Nativa con Apple Silicon)
+
+1. **Ejecutar el instalador nativo:**
+   El script creará un entorno virtual e instalará dinámicamente PyTorch y los paquetes oficiales de TensorFlow MPS para Mac (*tensorflow-macos* y *tensorflow-metal*).
+   ```bash
+   chmod +x setup_mac.sh
+   ./setup_mac.sh
+   ```
+
+2. **Iniciar JupyterLab:**
+   Cada vez que quieras usar el entorno, simplemente activa el entorno virtual en la terminal y ejecuta Jupyter indicándole la carpeta de trabajo:
+   ```bash
+   source venv_mac/bin/activate
+   jupyter lab --notebook-dir=notebooks
+   ```
 
 ---
 
-## Detener el contenedor
+## Acceder a JupyterLab
 
-```bash
-docker compose down
-```
+Ambas rutas inicializarán un servidor local. Abre tu navegador en:
 
----
-
-## Estructura del proyecto
-
-```
-jupiter_cuda/
-├── Dockerfile           # Imagen CUDA + Python + JupyterLab
-├── docker-compose.yml   # Configuracion del servicio con GPU
-├── requirements.txt     # Paquetes Python (PyTorch, numpy, etc.)
-└── notebooks/           # Directorio montado en el contenedor
-```
-
-Los notebooks guardados en `notebooks/` persisten aunque el contenedor se detenga.
+**http://localhost:8888**
+*(El entorno viene preconfigurado para no solicitar contraseñas ni tokens).*
 
 ---
 
-## Verificar que la GPU esta disponible
+## Verificar Aceleración Gráfica (GPU)
 
-Dentro de JupyterLab, crear un notebook y ejecutar:
+El proyecto incluye dos notebooks de comprobación dentro de la carpeta `notebooks/` que incluyen un benchmark comparando cálculos de la CPU contra la GPU.
 
-```python
-import torch
-print(torch.cuda.is_available())       # True si la GPU esta activa
-print(torch.cuda.get_device_name(0))   # Nombre de la GPU
-```
+Dentro de JupyterLab ingresa a la carpeta `notebooks/` y ejecuta:
+
+- **`gpu_check.ipynb`** → Si usas Windows o Linux (Valida que CUDA reconozca tu tarjeta NVIDIA y memoria).
+- **`gpu_check_mac.ipynb`** → Si usas macOS (Valida la interfaz de Metal Performance Shaders - MPS de Apple).
+
+*(Nota: Los archivos que crees y guardes dentro de esa carpeta persistirán aunque apagues Jupyter o detengas tu contenedor).*
 
 ---
 
-## Paquetes incluidos
+## 📦 Paquetes base y extensiones
 
-| Categoria      | Paquetes                                      |
+Este entorno viene aprovisionado inicialmente con (`requirements.txt`):
+
+| Categoría      | Paquetes                                      |
 |----------------|-----------------------------------------------|
-| Deep Learning  | PyTorch, torchvision, torchaudio (CUDA 12.6)  |
+| Deep Learning  | PyTorch, torchvision, torchaudio, TensorFlow |
 | Data Science   | NumPy, Pandas, Scikit-learn, SciPy            |
-| Visualizacion  | Matplotlib, Seaborn, Pillow                   |
+| Visualización  | Matplotlib, Seaborn, Pillow                   |
 | Utilidades     | tqdm, PyYAML, requests, ipywidgets            |
 
-Para agregar paquetes, editá `requirements.txt` y reconstrui la imagen con `docker compose build`.
+Para extender el entorno, simplemente edita el `requirements.txt` añadiendo las nuevas dependencias. 
+- En Docker (Win/Linux), deberás reconstruir imagen usando `docker compose build`. 
+- En macOS, simplemente instálalas con el entorno encendido mediante `pip install -r requirements.txt`.
