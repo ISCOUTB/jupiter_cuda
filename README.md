@@ -110,7 +110,23 @@ Este entorno viene aprovisionado inicialmente con (`requirements.txt`):
 | Data Science   | NumPy, Pandas, Scikit-learn, SciPy            |
 | Visualización  | Matplotlib, Seaborn, Pillow                   |
 | Utilidades     | tqdm, PyYAML, requests, ipywidgets            |
+| JupyterLab     | jupyterlab, ipykernel, ipywidgets, **jupyterlab-lsp, jupyterlab-execute-time** |
 
 Para extender el entorno, simplemente edita el `requirements.txt` añadiendo las nuevas dependencias. 
 - En Docker (Win/Linux), deberás reconstruir imagen usando `docker compose build`. 
 - En macOS, simplemente instálalas con el entorno encendido mediante `pip install -r requirements.txt`.
+
+### Extensiones incluidas
+
+- **jupyterlab-lsp**: Autocompletado, diagnóstico y navegación de código en notebooks y scripts desde JupyterLab (soporta Python, R, Julia, etc.).
+- **jupyterlab-execute-time**: Muestra el tiempo de ejecución de cada celda directamente en el notebook.
+
+Estas extensiones se instalan automáticamente desde `requirements.txt` y estarán disponibles al iniciar JupyterLab.
+
+---
+
+## Actualizar dependencias y extensiones
+
+Si agregas nuevas extensiones o paquetes a `requirements.txt`, recuerda:
+- En Docker (Win/Linux): reconstruye la imagen con `docker compose build` y reinicia con `docker compose up`.
+- En macOS: ejecuta `pip install -r requirements.txt` dentro del entorno virtual.

@@ -3,6 +3,10 @@ jupyterlab>=4.0
 ipywidgets
 ipykernel
 
+# Extensiones útiles para JupyterLab
+jupyterlab-lsp
+jupyterlab-execute-time
+
 # Data science core
 numpy
 pandas
