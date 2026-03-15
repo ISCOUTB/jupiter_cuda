@@ -26,3 +26,5 @@ tensorflow
 tqdm
 pyyaml
 requests
+pydot
+graphviz
