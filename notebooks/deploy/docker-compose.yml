@@ -1,0 +1,24 @@
+version: "3.9"
+
+services:
+  iris-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iris-classifier:latest
+    container_name: iris-api
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - "CMD"
+        - "python"
+        - "-c"
+        - "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    environment:
+      - PYTHONUNBUFFERED=1

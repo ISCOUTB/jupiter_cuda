@@ -29,6 +29,10 @@ WORKDIR /workspace
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Download NLP models (baked into the image — no network needed at runtime)
+RUN python -m spacy download en_core_web_md && \
+    python -m textblob.download_corpora
+
 # Jupyter config: no token, allow all origins, no browser
 RUN jupyter lab --generate-config && \
     echo "c.ServerApp.ip = '0.0.0.0'" >> /root/.jupyter/jupyter_lab_config.py && \

@@ -1,0 +1,13 @@
+# Excluir del contexto de build para reducir tamaño y tiempo de copia
+*.ipynb
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+*.pyo
+.git/
+.env
+*.log
+
+# Modelos versionados en el directorio padre (solo se usa el del COPY)
+modelo_iris_v*.joblib
+modelo_iris_v*_metadata.json

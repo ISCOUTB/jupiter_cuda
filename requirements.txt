@@ -21,6 +21,7 @@ torch
 torchvision
 torchaudio
 tensorflow
+transformers
 
 # Utilities
 tqdm
@@ -28,3 +29,11 @@ pyyaml
 requests
 pydot
 graphviz
+spacy
+textblob
+spacytextblob
+shap
+lime
+fastapi
+uvicorn
+nest_asyncio
